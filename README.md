@@ -46,9 +46,14 @@ docker compose up --build
 
 - **登录** → 进入主工作面
 - **`/` 帆布间晾晒架（主）**：按帆布间挂布卷芯片（挂签状态 `raw` / `dipping` / `cured`）；点击打开右侧面板登记 `DipRun`、切换固化状态；架下为浸渍流水次要信息流
+- **`/resin-total` 当日树脂加总台（只读）**：本间今天新登记浸渍的条数与树脂百分比合计（分间加总 + 当日明细），与晾晒架下方流水的今日记录加得上；不能改态、不能改树脂。顶栏与侧栏均可进入晾晒架与树脂加总
 - **`/rolls` · `/dips`（次要台账）**：保留列表/表单 CRUD，侧栏降级为「台账」入口，非主路径
 
-API 契约不变（JWT、`/api/lofts|rolls|dips|dashboard/`）。
+API 契约不变（JWT、`/api/lofts|rolls|dips|dashboard/`），新增只读 `GET /api/dips/daily-total/`。
+
+## 并发去重
+
+同一布卷同一浸渍日（`dip_date`，按本地时区从 `started_at` 派生）只许一笔 `DipRun` 入库：数据库唯一约束 `uniq_diprun_roll_dip_date` 兜底，并发重复登记返回 `409`，当日加总条数不会重复计数。
 
 ## 配色
 

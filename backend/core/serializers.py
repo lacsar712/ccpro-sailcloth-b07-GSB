@@ -1,3 +1,4 @@
+from django.utils import timezone
 from rest_framework import serializers
 
 from .models import ClothRoll, DipRun, Loft
@@ -78,6 +79,7 @@ class DipRunSerializer(serializers.ModelSerializer):
     )
     rollCode = serializers.CharField(source="roll.roll_code", read_only=True)
     loftName = serializers.CharField(source="roll.loft.name", read_only=True)
+    dipDate = serializers.DateField(source="dip_date", read_only=True)
 
     class Meta:
         model = DipRun
@@ -87,9 +89,23 @@ class DipRunSerializer(serializers.ModelSerializer):
             "rollCode",
             "loftName",
             "startedAt",
+            "dipDate",
             "resinPct",
             "cureHours",
             "notes",
             "created_at",
         )
-        read_only_fields = ("id", "rollCode", "loftName", "created_at")
+        read_only_fields = ("id", "rollCode", "loftName", "dipDate", "created_at")
+
+    def validate(self, attrs):
+        # 同一布卷同一浸渍日只许一笔入库（并发兜底由数据库唯一约束保证）
+        if self.instance is None:
+            roll = attrs.get("roll")
+            started_at = attrs.get("started_at")
+            if roll and started_at:
+                dip_date = timezone.localdate(started_at)
+                if DipRun.objects.filter(roll=roll, dip_date=dip_date).exists():
+                    raise serializers.ValidationError(
+                        {"rollId": "该布卷当日已登记浸渍，重复登记不入库"}
+                    )
+        return attrs

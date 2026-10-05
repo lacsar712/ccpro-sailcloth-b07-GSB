@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 
 class Loft(models.Model):
@@ -48,6 +49,8 @@ class ClothRoll(models.Model):
 class DipRun(models.Model):
     roll = models.ForeignKey(ClothRoll, on_delete=models.CASCADE, related_name="dip_runs")
     started_at = models.DateTimeField()
+    # 浸渍业务日（按本地时区从 started_at 派生），用于当日加总与同人同卷当日去重
+    dip_date = models.DateField(editable=False)
     resin_pct = models.DecimalField(max_digits=5, decimal_places=2)
     cure_hours = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
     notes = models.TextField(blank=True, default="")
@@ -55,6 +58,17 @@ class DipRun(models.Model):
 
     class Meta:
         ordering = ["-started_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["roll", "dip_date"],
+                name="uniq_diprun_roll_dip_date",
+            )
+        ]
+
+    def save(self, *args, **kwargs):
+        if self.started_at:
+            self.dip_date = timezone.localdate(self.started_at)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Dip@{self.roll_id} {self.started_at}"

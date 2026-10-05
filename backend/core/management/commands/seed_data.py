@@ -62,31 +62,32 @@ class Command(BaseCommand):
         )
 
         now = timezone.now()
-        DipRun.objects.bulk_create(
-            [
-                DipRun(
-                    roll=r1,
-                    started_at=now - timedelta(hours=8),
-                    resin_pct=Decimal("28.50"),
-                    cure_hours=None,
-                    notes="固化计时中",
-                ),
-                DipRun(
-                    roll=r2,
-                    started_at=now - timedelta(hours=1),
-                    resin_pct=Decimal("26.00"),
-                    cure_hours=Decimal("4.00"),
-                    notes="时长不足，不可标 cured",
-                ),
-                DipRun(
-                    roll=r3,
-                    started_at=now - timedelta(days=2),
-                    resin_pct=Decimal("30.00"),
-                    cure_hours=Decimal("14.50"),
-                    notes="已完成固化",
-                ),
-            ]
-        )
+        seed_runs = [
+            DipRun(
+                roll=r1,
+                started_at=now - timedelta(hours=8),
+                resin_pct=Decimal("28.50"),
+                cure_hours=None,
+                notes="固化计时中",
+            ),
+            DipRun(
+                roll=r2,
+                started_at=now - timedelta(hours=1),
+                resin_pct=Decimal("26.00"),
+                cure_hours=Decimal("4.00"),
+                notes="时长不足，不可标 cured",
+            ),
+            DipRun(
+                roll=r3,
+                started_at=now - timedelta(days=2),
+                resin_pct=Decimal("30.00"),
+                cure_hours=Decimal("14.50"),
+                notes="已完成固化",
+            ),
+        ]
+        for run in seed_runs:
+            run.dip_date = timezone.localdate(run.started_at)
+        DipRun.objects.bulk_create(seed_runs)
         self.stdout.write(
             self.style.SUCCESS(
                 f"种子完成：帆布间 {Loft.objects.count()}，布卷 {ClothRoll.objects.count()}，"

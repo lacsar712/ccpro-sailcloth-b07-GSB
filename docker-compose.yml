@@ -6,15 +6,15 @@ services:
       POSTGRES_USER: sailcloth
       POSTGRES_PASSWORD: sailcloth
     ports:
-      - "6470:5432"
+      - "6480:5432"
     volumes:
-      - sailcloth_4070_9070_6470_pg:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U sailcloth -d sailcloth"]
-      interval: 5s
-      timeout: 5s
-      retries: 30
-      start_period: 40s
+      - sailcloth_4080_9080_6480_pg:/var/lib/postgresql/data
+    # healthcheck:
+    #   test: ["CMD-SHELL", "pg_isready -U sailcloth -d sailcloth"]
+    #   interval: 5s
+    #   timeout: 5s
+    #   retries: 30
+    #   start_period: 40s
 
   backend:
     build: ./backend
@@ -27,21 +27,20 @@ services:
       POSTGRES_USER: sailcloth
       POSTGRES_PASSWORD: sailcloth
       ALLOWED_HOSTS: "*"
-      CORS_ALLOWED_ORIGINS: "http://localhost:4070,http://127.0.0.1:4070"
+      CORS_ALLOWED_ORIGINS: "http://localhost:4080,http://127.0.0.1:4080"
     ports:
-      - "9070:8000"
+      - "9080:8000"
     depends_on:
-      db:
-        condition: service_healthy
+      - db
     volumes:
       - ./backend:/app
 
   frontend:
     build: ./frontend
     ports:
-      - "4070:80"
+      - "4080:80"
     depends_on:
       - backend
 
 volumes:
-  sailcloth_4070_9070_6470_pg:
+  sailcloth_4080_9080_6480_pg:

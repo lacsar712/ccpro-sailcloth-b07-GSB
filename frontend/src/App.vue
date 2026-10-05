@@ -27,6 +27,7 @@ function logout() {
       </div>
       <nav>
         <router-link to="/">晾晒架</router-link>
+        <router-link to="/resin-total">树脂加总</router-link>
       </nav>
       <div class="nav-secondary">
         <p class="nav-sec-label">台账（次要）</p>
@@ -35,8 +36,17 @@ function logout() {
       </div>
       <button class="linkish" type="button" @click="logout">退出 {{ auth.user?.username }}</button>
     </aside>
-    <main class="content">
-      <router-view />
-    </main>
+    <div class="main-col">
+      <header class="topbar">
+        <nav class="topbar-nav">
+          <router-link to="/">晾晒架</router-link>
+          <router-link to="/resin-total">树脂加总</router-link>
+        </nav>
+        <span class="topbar-user">{{ auth.user?.username }}</span>
+      </header>
+      <main class="content">
+        <router-view />
+      </main>
+    </div>
   </div>
 </template>

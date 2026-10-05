@@ -95,6 +95,47 @@ body {
 }
 .content { padding: 28px 32px; max-width: 1200px; }
 
+/* 顶栏 */
+.main-col {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 32px;
+  background: rgba(255, 252, 246, 0.94);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+.topbar-nav {
+  display: flex;
+  gap: 8px;
+}
+.topbar-nav a {
+  color: var(--navy-mid);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 8px;
+}
+.topbar-nav a:hover {
+  background: rgba(196, 163, 90, 0.18);
+}
+.topbar-nav a.router-link-active {
+  background: var(--navy);
+  color: var(--canvas);
+}
+.topbar-user {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
 h1 { margin: 0 0 8px; font-weight: 700; }
 .sub { margin: 0 0 20px; color: var(--muted); }
 
@@ -405,4 +446,5 @@ th { background: var(--canvas-deep); color: var(--navy); }
 @media (max-width: 800px) {
   .layout { grid-template-columns: 1fr; }
   .content { padding: 18px 16px; }
+  .topbar { padding: 10px 16px; }
 }
