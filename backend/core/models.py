@@ -1,4 +1,30 @@
+from zoneinfo import ZoneInfo
+
+from django.conf import settings
 from django.db import models
+from django.db.models.functions import TruncDate
+
+
+class LocalDipDate(TruncDate):
+    """按配置时区（Asia/Shanghai）截取浸渍开始时间的本地自然日。
+
+    构造时固定注入 settings.TIME_ZONE，使 UniqueConstraint 的「同一本地
+    自然日」不依赖运行时当前时区。
+    """
+
+    def __init__(self, expression, output_field=None, **extra):
+        super().__init__(
+            expression,
+            tzinfo=ZoneInfo(settings.TIME_ZONE),
+            output_field=output_field,
+            **extra,
+        )
+
+    def deconstruct(self):
+        # tzinfo（ZoneInfo）无法序列化进迁移，只写表达式；
+        # __init__ 会自行补回时区。
+        path = f"{self.__class__.__module__}.{self.__class__.__name__}"
+        return (path, self.source_expressions, {})
 
 
 class Loft(models.Model):
@@ -55,6 +81,15 @@ class DipRun(models.Model):
 
     class Meta:
         ordering = ["-started_at"]
+        constraints = [
+            # 同一原布同一本地自然日只许入库一笔浸渍：
+            # 两名浸胶工交叉连点各登一笔时，数据库层挡下第二笔。
+            models.UniqueConstraint(
+                LocalDipDate("started_at"),
+                "roll",
+                name="uniq_one_dip_per_roll_per_day",
+            ),
+        ]
 
     def __str__(self):
         return f"Dip@{self.roll_id} {self.started_at}"
